@@ -1,12 +1,15 @@
 #include "model_checker/work_queue.h"
+
 #include <cassert>
-#include <print>
+#include <cstdint>
+#include <vector>
 
 namespace model {
 
-std::optional<WorkQueue> WorkQueue::steal_work() {
+std::unique_ptr<WorkQueue> WorkQueue::steal_work() {
+  std::lock_guard lock(mtx_);
   if (done_) {
-    return std::nullopt;
+    return nullptr;
   }
 
   // We steal from near the root of the tree, but the first branch point might
@@ -20,10 +23,10 @@ std::optional<WorkQueue> WorkQueue::steal_work() {
 
     new_committed_choices.push_back(next_choices.back());
     next_choices.pop_back();
-    return WorkQueue(new_committed_choices);
+    return std::make_unique<WorkQueue>(new_committed_choices);
   }
 
-  return std::nullopt;
+  return nullptr;
 }
 
 uint8_t WorkQueue::get_choice(uint8_t height, uint8_t n_opts) {
@@ -36,6 +39,8 @@ uint8_t WorkQueue::get_choice(uint8_t height, uint8_t n_opts) {
     return passed_choices_[pass_index].first;
   }
 
+  std::lock_guard lock(mtx_);
+
   assert(pass_index == passed_choices_.size());
   std::vector<uint8_t> next_choices;
   next_choices.reserve(n_opts - 1);
@@ -47,6 +52,7 @@ uint8_t WorkQueue::get_choice(uint8_t height, uint8_t n_opts) {
 }
 
 void WorkQueue::advance_cursor() {
+  std::lock_guard lock(mtx_);
 
   for (ssize_t i = passed_choices_.size() - 1; i >= 0; --i) {
     auto &[choice, next_choices] = passed_choices_[i];

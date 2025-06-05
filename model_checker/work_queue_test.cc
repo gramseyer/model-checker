@@ -48,7 +48,7 @@ TEST(WorkQueue, StealWork) {
 
   {
     auto work = work_queue.steal_work();
-    EXPECT_TRUE(work);
+    ASSERT_TRUE(work);
     EXPECT_EQ(work->get_choice(0, 3), 2);
     EXPECT_EQ(work->get_choice(1, 3), 0);
     EXPECT_EQ(work->get_choice(2, 3), 0);
@@ -56,7 +56,7 @@ TEST(WorkQueue, StealWork) {
 
   {
     auto work = work_queue.steal_work();
-    EXPECT_TRUE(work);
+    ASSERT_TRUE(work);
     EXPECT_EQ(work->get_choice(0, 3), 1);
     EXPECT_EQ(work->get_choice(1, 3), 1);
     EXPECT_EQ(work->get_choice(2, 3), 0);
@@ -64,7 +64,7 @@ TEST(WorkQueue, StealWork) {
 
   {
     auto work = work_queue.steal_work();
-    EXPECT_TRUE(work);
+    ASSERT_TRUE(work);
     EXPECT_EQ(work->get_choice(0, 3), 1);
     EXPECT_EQ(work->get_choice(1, 3), 2);
     EXPECT_EQ(work->get_choice(2, 3), 0);
@@ -72,7 +72,7 @@ TEST(WorkQueue, StealWork) {
 
   {
     auto work = work_queue.steal_work();
-    EXPECT_TRUE(work);
+    ASSERT_TRUE(work);
     EXPECT_EQ(work->get_choice(0, 3), 1);
     EXPECT_EQ(work->get_choice(1, 3), 0);
     EXPECT_EQ(work->get_choice(2, 3), 1);
@@ -80,7 +80,7 @@ TEST(WorkQueue, StealWork) {
 
   {
     auto work = work_queue.steal_work();
-    EXPECT_TRUE(work);
+    ASSERT_TRUE(work);
     EXPECT_EQ(work->get_choice(0, 3), 1);
     EXPECT_EQ(work->get_choice(1, 3), 0);
     EXPECT_EQ(work->get_choice(2, 3), 2);
