@@ -4,9 +4,26 @@
 
 namespace model {
 
-WorkQueue WorkQueue::steal_work() {
-  // TODO(unimpl)
-  throw std::runtime_error("Not implemented");
+std::optional<WorkQueue> WorkQueue::steal_work() {
+  if (done_) {
+    return std::nullopt;
+  }
+
+  // We steal from near the root of the tree, but the first branch point might
+  // have been fully stolen and so we need to continue down to lower levels
+  std::vector<uint8_t> new_committed_choices = committed_choices_;
+  for (auto &[choice, next_choices] : passed_choices_) {
+    if (next_choices.empty()) {
+      new_committed_choices.push_back(choice);
+      continue;
+    }
+
+    new_committed_choices.push_back(next_choices.back());
+    next_choices.pop_back();
+    return WorkQueue(new_committed_choices);
+  }
+
+  return std::nullopt;
 }
 
 uint8_t WorkQueue::get_choice(uint8_t height, uint8_t n_opts) {
@@ -30,15 +47,12 @@ uint8_t WorkQueue::get_choice(uint8_t height, uint8_t n_opts) {
 }
 
 void WorkQueue::advance_cursor() {
-  std::println("advancing cursor: passed_choices_ size {}",
-               passed_choices_.size());
-  
+
   for (ssize_t i = passed_choices_.size() - 1; i >= 0; --i) {
     auto &[choice, next_choices] = passed_choices_[i];
     if (next_choices.empty()) {
       // continue to a lower layer
       passed_choices_.pop_back();
-      std::println("popping back a layer: current {}", i);
       continue;
     }
 
@@ -46,7 +60,6 @@ void WorkQueue::advance_cursor() {
     next_choices.pop_back();
     return;
   }
-  std::println("got to end");
   // if we get all the way to committed_choices_, we must have finished
   // the entire search tree
   done_ = true;
