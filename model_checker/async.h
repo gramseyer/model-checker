@@ -7,7 +7,6 @@
 
 #include "model_checker/work_queue.h"
 
-
 namespace model {
 
 struct Async {

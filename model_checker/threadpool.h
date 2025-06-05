@@ -71,11 +71,10 @@ private:
 
 template <typename... Args> class ExperimentBuilder {
 public:
-  ExperimentBuilder(
-      std::tuple<Args...> args,
-      std::function<std::unique_ptr<RunnableActionSet>(WorkQueue &, Args &...)>
-          build,
-      std::function<bool(ActionResult, Args &...)> check)
+  ExperimentBuilder(std::tuple<Args...> args,
+                    std::unique_ptr<RunnableActionSet> (*build)(WorkQueue &,
+                                                                Args &...),
+                    bool (*check)(ActionResult, Args &...))
       : args_(args), build_(build), check_(check) {}
 
   Experiment<Args...> build() {

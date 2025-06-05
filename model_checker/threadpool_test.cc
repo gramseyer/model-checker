@@ -56,7 +56,7 @@ TEST(ThreadPool, Stealing) {
                   b += 5;
                 },
                 a, b);
-            
+
             actions->add_action(
                 [](RunnableActionSet &set, int &a, int &b) -> Async {
                   co_await set.bg();
@@ -102,6 +102,5 @@ TEST(ThreadPool, Stealing) {
 
   pool.run(experiment);
 }
-
 
 } // namespace model
