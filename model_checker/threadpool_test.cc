@@ -103,4 +103,33 @@ TEST(ThreadPool, Stealing) {
   pool.run(experiment);
 }
 
+TEST(ThreadPool, NoActionEdgeCase) {
+  ThreadPool<int, int> pool(4);
+  std::shared_ptr<ExperimentBuilder<int, int>> experiment =
+      std::make_shared<ExperimentBuilder<int, int>>(
+          std::make_tuple(1, 2),
+          [](WorkQueue &work_queue, int &a, int &b) {
+            auto actions = std::make_unique<RunnableActionSet>(work_queue);
+
+            actions->add_action(
+                [](RunnableActionSet &set, int &a, int &b) -> Async {
+                  b = 1;
+                  a = 2;
+                  co_return;
+                },
+                a, b);
+
+            return actions;
+          },
+          [](ActionResult res, int &a, int &b) -> bool {
+            if (res != ActionResult::OK) {
+              return false;
+            }
+
+            return a == 2 && b == 1;
+          });
+
+  pool.run(experiment);
+}
+
 } // namespace model
