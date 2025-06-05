@@ -103,7 +103,7 @@ TEST(ThreadPool, Stealing) {
   pool.run(experiment);
 }
 
-TEST(ThreadPool, NoActionEdgeCase) {
+TEST(ThreadPool, NoWaitPointsEdgeCase) {
   ThreadPool<int, int> pool(4);
   std::shared_ptr<ExperimentBuilder<int, int>> experiment =
       std::make_shared<ExperimentBuilder<int, int>>(
@@ -127,6 +127,25 @@ TEST(ThreadPool, NoActionEdgeCase) {
             }
 
             return a == 2 && b == 1;
+          });
+
+  pool.run(experiment);
+}
+
+TEST(ThreadPool, NoActionsEdgeCase) {
+  ThreadPool<int, int> pool(4);
+  std::shared_ptr<ExperimentBuilder<int, int>> experiment =
+      std::make_shared<ExperimentBuilder<int, int>>(
+          std::make_tuple(1, 2),
+          [](WorkQueue &work_queue, int &a, int &b) {
+            return std::make_unique<RunnableActionSet>(work_queue);
+          },
+          [](ActionResult res, int &a, int &b) -> bool {
+            if (res != ActionResult::OK) {
+              return false;
+            }
+
+            return a == 1 && b == 2;
           });
 
   pool.run(experiment);
