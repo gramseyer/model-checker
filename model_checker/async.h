@@ -26,6 +26,8 @@ private:
   Async() noexcept = default;
 };
 
+enum class ActionResult { OK = 0, TIMEOUT = 1 };
+
 class RunnableActionSet;
 
 template <typename T, typename... Args>
@@ -34,7 +36,9 @@ concept is_captureless_lambda =
 
 class RunnableActionSet {
 public:
-  RunnableActionSet(WorkQueue &work_queue) : work_queue_(work_queue) {}
+  RunnableActionSet(WorkQueue &work_queue,
+                    size_t max_decisions = std::numeric_limits<size_t>::max())
+      : work_queue_(work_queue), max_decisions_(max_decisions) {}
 
   template <typename... Args>
   void add_action(is_captureless_lambda<Args...> auto action, Args &&...args) {
@@ -59,12 +63,13 @@ public:
     return AwaitBackground(*this);
   }
 
-  void run();
+  ActionResult run();
 
 private:
   void run_next_decision();
 
   size_t decision_count_ = 0;
+  size_t max_decisions_ = 0;
   WorkQueue &work_queue_;
   std::vector<std::coroutine_handle<>> actions_;
 };

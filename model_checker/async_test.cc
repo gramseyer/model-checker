@@ -73,7 +73,7 @@ TEST(Async, RunnableActionSetFullTree) {
       // 2-2
     });
 
-    set.run();
+    ASSERT_EQ(set.run(), ActionResult::OK);
 
     loop_iters++;
     work_queue.advance_cursor();
@@ -120,7 +120,7 @@ TEST(Async, RunnableActionSetAdditionIsCommutative) {
         },
         value);
 
-    set.run();
+    ASSERT_EQ(set.run(), ActionResult::OK);
 
     loop_iters++;
     work_queue.advance_cursor();
@@ -128,6 +128,45 @@ TEST(Async, RunnableActionSetAdditionIsCommutative) {
     ASSERT_EQ(value, 15 - 7);
   }
   EXPECT_EQ(loop_iters, 6);
+}
+
+TEST(Async, BlockProposalMimic) {
+  WorkQueue work_queue;
+
+  while (!work_queue.done()) {
+    RunnableActionSet set(work_queue, 8);
+    int32_t value = 10;
+
+    set.add_action(
+        [](RunnableActionSet &set, int32_t &value) -> Async {
+          co_await set.bg();
+          while (value < 20) {
+            co_await set.bg();
+          }
+          value -= 20;
+        },
+        value);
+
+    set.add_action(
+        [](RunnableActionSet &set, int32_t &value) -> Async {
+          co_await set.bg();
+          value += 5;
+          co_await set.bg();
+          value += 12;
+        },
+        value);
+
+    auto r = set.run();
+    if (r == ActionResult::TIMEOUT) {
+      ASSERT_TRUE(value == 10 || value == 15 || value == 27);
+
+    } else {
+      ASSERT_EQ(r, ActionResult::OK);
+      ASSERT_EQ(value, 10 + 5 + 12 - 20);
+    }
+
+    work_queue.advance_cursor();
+  }
 }
 
 } // namespace model

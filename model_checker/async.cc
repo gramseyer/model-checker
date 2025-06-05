@@ -3,7 +3,7 @@
 namespace model {
 
 void RunnableActionSet::run_next_decision() {
-  if (actions_.empty()) {
+  if (actions_.empty() || decision_count_ >= max_decisions_) {
     return;
   }
 
@@ -18,11 +18,16 @@ void RunnableActionSet::run_next_decision() {
   action.resume();
 }
 
-void RunnableActionSet::run() {
+ActionResult RunnableActionSet::run() {
   assert(decision_count_ == 0);
-  while (!actions_.empty()) {
+  while (!actions_.empty() && decision_count_ < max_decisions_) {
     run_next_decision();
   }
+  if (actions_.empty()) {
+    return ActionResult::OK;
+  }
+  assert(decision_count_ == max_decisions_);
+  return ActionResult::TIMEOUT;
 }
 
 } // namespace model
