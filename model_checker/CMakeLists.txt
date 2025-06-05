@@ -1,5 +1,6 @@
 add_library(
   model_checker
+  async.cc
   work_queue.cc
 )
 
@@ -11,6 +12,7 @@ target_include_directories(
 
 add_executable(
   model_checker_test
+  async_test.cc
   work_queue_test.cc
 )
 target_link_libraries(

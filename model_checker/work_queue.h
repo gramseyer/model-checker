@@ -24,6 +24,10 @@ public:
   void advance_cursor();
   bool done() const { return done_; }
 
+  size_t decision_count() const {
+    return committed_choices_.size() + passed_choices_.size();
+  }
+
 private:
   // steal_work can modify passed_choices_[i].second, but not .first or
   // passed_choices_. advance_cursor can modify passed_choices_.  Hence, mtx_ is
