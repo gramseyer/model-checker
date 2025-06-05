@@ -1,8 +1,10 @@
 #pragma once
 
+#include <atomic>
 #include <cstdint>
 #include <memory>
 #include <mutex>
+#include <queue>
 #include <vector>
 
 namespace model {
@@ -12,6 +14,12 @@ public:
   WorkQueue() = default;
   WorkQueue(std::vector<uint8_t> committed_choices)
       : mtx_(), committed_choices_(std::move(committed_choices)) {}
+
+  // disable copy and move
+  WorkQueue(const WorkQueue &) = delete;
+  WorkQueue &operator=(const WorkQueue &) = delete;
+  WorkQueue(WorkQueue &&) = delete;
+  WorkQueue &operator=(WorkQueue &&) = delete;
 
   // Work steal might still fail even if the work queue isn't done;
   // we might be in the middle of a computation and just haven't found a branch
@@ -39,6 +47,36 @@ private:
   const std::vector<uint8_t> committed_choices_;
   std::vector<std::pair<uint8_t, std::vector<uint8_t>>> passed_choices_;
   bool done_ = false;
+};
+
+class WorkQueueManager {
+public:
+  WorkQueueManager(size_t n_work_queues);
+
+  // Steals work if current work queue is done
+  // returns nullptr if overall work is done
+  WorkQueue *get_work_queue(size_t idx);
+  void mark_self_as_stealable(size_t idx) {
+    mark_as_stealable(work_queues_[idx]);
+  }
+
+  bool done() const;
+
+private:
+  struct QueueState {
+    QueueState() = default;
+    std::shared_ptr<WorkQueue> work_ = nullptr;
+    std::atomic<bool> in_steal_queue_ = false;
+  };
+
+  void mark_as_stealable(QueueState &state);
+
+  std::vector<QueueState> work_queues_;
+
+  std::mutex mtx_;
+  std::condition_variable cv_;
+  int32_t pending_steals_ = 0;
+  std::queue<QueueState *> stealable_set_;
 };
 
 } // namespace model

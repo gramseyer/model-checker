@@ -4,6 +4,7 @@
 #include <cassert>
 #include <coroutine>
 #include <exception>
+#include <functional>
 #include <vector>
 
 namespace model {
@@ -21,7 +22,7 @@ struct Async {
 
 private:
   // Make constructor private to flag an error in case a function
-  // returns Detached without using coroutine operations (i.e.,
+  // returns Async without using coroutine operations (i.e.,
   // co_await or co_return) to avoid weird surprises.
   Async() noexcept = default;
 };
@@ -40,14 +41,18 @@ public:
                     size_t max_decisions = std::numeric_limits<size_t>::max())
       : work_queue_(work_queue), max_decisions_(max_decisions) {}
 
+  // disable copy and move
+  RunnableActionSet(const RunnableActionSet &) = delete;
+  RunnableActionSet &operator=(const RunnableActionSet &) = delete;
+  RunnableActionSet(RunnableActionSet &&) = delete;
+  RunnableActionSet &operator=(RunnableActionSet &&) = delete;
+
   template <typename... Args>
   void add_action(is_captureless_lambda<Args...> auto action, Args &&...args) {
     assert(decision_count_ == 0);
     action(*this, std::forward<Args>(args)...);
   }
 
-  // co_await pool.bg() suspends the current coroutine and resumes it
-  // as soon as possible in a different thread.
   [[nodiscard]] auto bg() {
     struct AwaitBackground {
       RunnableActionSet &set;

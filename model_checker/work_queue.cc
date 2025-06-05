@@ -1,5 +1,6 @@
 #include "model_checker/work_queue.h"
 
+#include <atomic>
 #include <cassert>
 #include <cstdint>
 #include <vector>
@@ -69,6 +70,63 @@ void WorkQueue::advance_cursor() {
   // if we get all the way to committed_choices_, we must have finished
   // the entire search tree
   done_ = true;
+}
+
+WorkQueueManager::WorkQueueManager(size_t n_work_queues)
+    : work_queues_(n_work_queues) {
+  work_queues_[0].work_ = std::make_shared<WorkQueue>();
+}
+
+void WorkQueueManager::mark_as_stealable(QueueState &state) {
+
+  if (state.in_steal_queue_) {
+    return;
+  }
+
+  std::lock_guard lock(mtx_);
+  state.in_steal_queue_ = true;
+  stealable_set_.push(&state);
+  cv_.notify_all();
+}
+
+WorkQueue *WorkQueueManager::get_work_queue(size_t idx) {
+  assert(idx < work_queues_.size());
+
+  if (work_queues_[idx].work_ != nullptr && !work_queues_[idx].work_->done()) {
+    return work_queues_[idx].work_.get();
+  }
+
+  // This is kind of sketchy; in bad patterns we might wind up just spinning
+  // while waiting for one queue to find new choices, but I suspect this is good
+  // enough for most cases.
+
+  std::unique_lock lock(mtx_);
+  pending_steals_++;
+
+  auto done = [this]() { return (pending_steals_ == work_queues_.size()); };
+
+  while (true) {
+    if (stealable_set_.empty()) {
+      cv_.wait(lock, [&]() { return !stealable_set_.empty() || done(); });
+    }
+    if (done()) {
+      assert(pending_steals_ == work_queues_.size());
+      cv_.notify_all();
+      return nullptr;
+    }
+    auto steal_from = stealable_set_.front();
+    assert(steal_from);
+    assert(steal_from->work_);
+
+    if (auto ptr = steal_from->work_->steal_work()) {
+      work_queues_[idx].work_ = std::move(ptr);
+      work_queues_[idx].in_steal_queue_ = false;
+      pending_steals_--;
+      return work_queues_[idx].work_.get();
+    }
+    steal_from->in_steal_queue_ = false;
+    stealable_set_.pop();
+  }
 }
 
 } // namespace model

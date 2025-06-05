@@ -14,6 +14,7 @@ add_executable(
   model_checker_test
   async_test.cc
   work_queue_test.cc
+  threadpool_test.cc
 )
 target_link_libraries(
   model_checker_test
