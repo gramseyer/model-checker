@@ -3,6 +3,7 @@
 #include <memory>
 #include <tuple>
 
+#include "model_checker/async.h"
 #include "model_checker/threadpool.h"
 
 namespace model {

@@ -1,11 +1,12 @@
 #pragma once
 
-#include "model_checker/work_queue.h"
 #include <cassert>
 #include <coroutine>
 #include <exception>
-#include <functional>
 #include <vector>
+
+#include "model_checker/work_queue.h"
+
 
 namespace model {
 
