@@ -109,6 +109,8 @@ WorkQueue *WorkQueueManager::get_work_queue(size_t idx) {
     if (stealable_set_.empty()) {
       cv_.wait(lock, [&]() { return !stealable_set_.empty() || done(); });
     }
+    // If everyone is waiting to steal work, then nobody has work left and we
+    // must be done.
     if (done()) {
       assert(pending_steals_ == work_queues_.size());
       cv_.notify_all();
@@ -119,11 +121,13 @@ WorkQueue *WorkQueueManager::get_work_queue(size_t idx) {
     assert(steal_from->work_);
 
     if (auto ptr = steal_from->work_->steal_work()) {
+      // not in steal queue because it's new work
       work_queues_[idx].work_ = std::move(ptr);
       work_queues_[idx].in_steal_queue_ = false;
       pending_steals_--;
       return work_queues_[idx].work_.get();
     }
+    // not in steal queue because it's popped from the queue
     steal_from->in_steal_queue_ = false;
     stealable_set_.pop();
   }
