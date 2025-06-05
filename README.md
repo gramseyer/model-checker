@@ -1,7 +1,7 @@
 # Model Checker
 
 A C++23 library for systematic testing of concurrent and asynchronous code.
-This library exhaustively explores different execution interleavings of concurrent operations to find race conditions, deadlocks, and other concurrency bugs.
+This library exhaustively explores different execution interleavings of concurrent operations.
 
 Each test consists of a set of coroutines operating on some shared state
 (a set of logical "threads").  At programmer-specified points 
