@@ -77,7 +77,7 @@ Some workflows may iterate indefinitely.  Use a "timeout" to set a maximum depth
 ```cpp
 RunnableActionSet set(work_queue, 100); // Max 100 decisions
 auto result = set.run();
-if (result == ActionResult::TIMEOUT) {
+if (result == ActionResult::kTimeout) {
     // Handle timeout case
 }
 ```
