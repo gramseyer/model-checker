@@ -228,7 +228,7 @@ TEST(Async, ManualChoice)
       }
       return testing::AssertionFailure()
              << "z=" << z
-             << " path=" << std::format("{}", work_queue.get_current_path());
+             << " path=" << show_path(work_queue.get_current_path());
     };
 
     EXPECT_TRUE(check());

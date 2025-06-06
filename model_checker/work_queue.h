@@ -44,18 +44,7 @@ public:
     return committed_choices_.size() + passed_choices_.size();
   }
 
-  std::vector<uint8_t> get_current_path() const
-  {
-    std::vector<uint8_t> path;
-    path.reserve(decision_count());
-    for (const auto &choice : committed_choices_) {
-      path.push_back(choice);
-    }
-    for (auto const &[choice, _] : passed_choices_) {
-      path.push_back(choice);
-    }
-    return path;
-  }
+  std::vector<uint8_t> get_current_path() const;
 
 private:
   // steal_work can modify passed_choices_[i].second, but not .first or
@@ -74,6 +63,8 @@ private:
   std::vector<std::pair<uint8_t, std::vector<uint8_t>>> passed_choices_;
   bool done_ = false;
 };
+
+std::string show_path(const std::vector<uint8_t> &path);
 
 class WorkQueueManager {
 public:

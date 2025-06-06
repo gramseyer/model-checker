@@ -3,6 +3,7 @@
 #include <atomic>
 #include <cassert>
 #include <cstdint>
+#include <format>
 #include <vector>
 
 namespace model {
@@ -155,6 +156,40 @@ WorkQueueManager::get_work_queue(size_t idx)
     // not in steal queue because it's popped from the queue
     steal_from->in_steal_queue_ = false;
     stealable_set_.pop();
+  }
+}
+
+std::vector<uint8_t>
+WorkQueue::get_current_path() const
+{
+  std::vector<uint8_t> path;
+  path.reserve(decision_count());
+  for (const auto &choice : committed_choices_) {
+    path.push_back(choice);
+  }
+  for (auto const &[choice, _] : passed_choices_) {
+    path.push_back(choice);
+  }
+  return path;
+}
+
+std::string
+show_path(const std::vector<uint8_t> &path)
+{
+  if constexpr (requires { std::format("{}", path); }) {
+    return std::format("{}", path);
+  }
+  else {
+    std::string out = "{";
+    bool first = true;
+    for (auto c : path) {
+      if (!first) {
+        out += ", ";
+      }
+      out += std::to_string(c);
+      first = false;
+    }
+    return out;
   }
 }
 

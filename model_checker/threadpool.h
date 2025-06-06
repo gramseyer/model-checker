@@ -156,23 +156,8 @@ public:
   {
     auto res = run(experiment, initial_path);
     if (res.has_value()) {
-      if constexpr (requires { std::format("{}", res.value()); }) {
-        return ::testing::AssertionFailure()
-               << "Found bad path: " << std::format("{}", res.value());
-      } else {
-        std::string out = "{";
-        bool first = true;
-        for (auto c : res.value()) {
-          if (!first) {
-            out += ", ";
-          }
-          out += std::to_string(c);
-          first = false;
-        }
-        out += "}"; 
-        return ::testing::AssertionFailure()
-               << "Found bad path: " << out;
-      }
+      return ::testing::AssertionFailure()
+             << "Found bad path: " << show_path(res.value());
     }
     return ::testing::AssertionSuccess();
   }
