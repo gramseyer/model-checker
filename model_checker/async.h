@@ -75,10 +75,19 @@ public:
     return AwaitBackground(*this);
   }
 
+  // Does not pause the coroutine.  Just executes a choice (with a given branch
+  // count) and returns the chosen option, which the caller can intepret as it
+  // wishes.
+  [[nodiscard]] uint8_t choice(uint8_t option_count)
+  {
+    return do_manual_choice(option_count);
+  }
+
   ActionResult run();
 
 private:
   void run_next_decision();
+  uint8_t do_manual_choice(uint8_t option_count);
 
   size_t decision_count_ = 0;
   size_t max_decisions_ = 0;

@@ -36,11 +36,13 @@ uint8_t
 WorkQueue::get_choice(uint8_t height, uint8_t n_opts)
 {
   if (height < committed_choices_.size()) {
+    assert(committed_choices_[height] < n_opts);
     return committed_choices_[height];
   }
 
   size_t pass_index = height - committed_choices_.size();
   if (pass_index < passed_choices_.size()) {
+    assert(passed_choices_[pass_index].first < n_opts);
     return passed_choices_[pass_index].first;
   }
 
@@ -78,10 +80,11 @@ WorkQueue::advance_cursor()
   done_ = true;
 }
 
-WorkQueueManager::WorkQueueManager(size_t n_work_queues)
+WorkQueueManager::WorkQueueManager(size_t n_work_queues,
+                                   std::vector<uint8_t> initial_path)
   : work_queues_(n_work_queues)
 {
-  work_queues_[0].work_ = std::make_shared<WorkQueue>();
+  work_queues_[0].work_ = std::make_shared<WorkQueue>(initial_path);
 }
 
 void

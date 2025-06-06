@@ -20,6 +20,12 @@ RunnableActionSet::run_next_decision()
   action.resume();
 }
 
+uint8_t
+RunnableActionSet::do_manual_choice(uint8_t option_count)
+{
+  return work_queue_.get_choice(decision_count_++, option_count);
+}
+
 ActionResult
 RunnableActionSet::run()
 {

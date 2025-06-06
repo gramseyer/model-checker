@@ -175,4 +175,66 @@ TEST(Async, BlockProposalMimic)
   }
 }
 
+TEST(Async, ManualChoice)
+{
+  // Note: Once you find a bad path in your code, you can log it as per the
+  // example below, and then rerun the test using just that path by modifying
+  // the initial WorkQueue For example, swapping the below line to WorkQueue
+  // work_queue({1, 1, 1});)` would start with just the path 1, 1, 1, and then
+  // explore all choices below that prefix.
+  WorkQueue work_queue;
+
+  while (!work_queue.done()) {
+    RunnableActionSet set(work_queue);
+
+    int x = 0, y = 0, z = 0;
+
+    set.add_action(
+        [](RunnableActionSet &set, int &x, int &y, int &z) -> Async {
+          co_await set.bg();
+          auto choice = set.choice(2);
+          if (choice) {
+            x = 1;
+          }
+          else {
+            x = 2;
+          }
+
+          co_await set.bg();
+          if (set.choice(2)) {
+            y = 10;
+          }
+          else {
+            y = 20;
+          }
+        },
+        x, y, z);
+
+    set.add_action(
+        [](RunnableActionSet &set, int &x, int &y, int &z) -> Async {
+          co_await set.bg();
+          z += x;
+          co_await set.bg();
+          z += y;
+        },
+        x, y, z);
+
+    ASSERT_EQ(set.run(), ActionResult::kOk);
+
+    auto check = [&]() -> testing::AssertionResult {
+      if (z == 0 || z == 1 || z == 2 || z == 10 || z == 11 || z == 12 ||
+          z == 20 || z == 21 || z == 22) {
+        return testing::AssertionSuccess();
+      }
+      return testing::AssertionFailure()
+             << "z=" << z
+             << " path=" << std::format("{}", work_queue.get_current_path());
+    };
+
+    EXPECT_TRUE(check());
+
+    work_queue.advance_cursor();
+  }
+}
+
 } // namespace model

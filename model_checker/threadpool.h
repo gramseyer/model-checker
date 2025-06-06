@@ -115,13 +115,18 @@ public:
   ThreadPool(const ThreadPool &p) = delete;
   ThreadPool &operator=(const ThreadPool &p) = delete;
 
-  void run(std::shared_ptr<ExperimentBuilder<Args...>> experiment)
+  // Supply the initial_path with some vector of choices if you wish to check
+  // only a subset of the search space.
+  void run(std::shared_ptr<ExperimentBuilder<Args...>> experiment,
+           std::vector<uint8_t> initial_path = {})
   {
     barrier_.emplace(workers_.size());
     finish_ = false;
     {
       std::scoped_lock g(mtx_);
-      work_queue_manager_ = std::make_unique<WorkQueueManager>(workers_.size());
+      work_queue_manager_ =
+          std::make_unique<WorkQueueManager>(workers_.size(),
+                                             std::move(initial_path));
       experiment_ = experiment;
 
       cv_.notify_all();

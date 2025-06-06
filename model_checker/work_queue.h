@@ -38,13 +38,25 @@ public:
     return committed_choices_.size() + passed_choices_.size();
   }
 
+  std::vector<uint8_t> get_current_path() const
+  {
+    std::vector<uint8_t> path;
+    path.reserve(decision_count());
+    for (const auto &choice : committed_choices_) {
+      path.push_back(choice);
+    }
+    for (auto const &[choice, _] : passed_choices_) {
+      path.push_back(choice);
+    }
+    return path;
+  }
+
 private:
   // steal_work can modify passed_choices_[i].second, but not .first or
   // passed_choices_. advance_cursor can modify passed_choices_.  Hence, mtx_ is
   // held during these methods. get_choice can modify passed_choices_ _if and
   // only if_ we add a new choice, so get_choice only acquires the mutex in that
   // scenario.
-
   std::mutex mtx_;
   const std::vector<uint8_t> committed_choices_;
   std::vector<std::pair<uint8_t, std::vector<uint8_t>>> passed_choices_;
@@ -53,7 +65,8 @@ private:
 
 class WorkQueueManager {
 public:
-  WorkQueueManager(size_t n_work_queues);
+  WorkQueueManager(size_t n_work_queues,
+                   std::vector<uint8_t> initial_path = {});
 
   // Steals work if current work queue is done
   // returns nullptr if overall work is done
