@@ -156,4 +156,65 @@ TEST(ThreadPool, NoActionsEdgeCase)
   pool.run(experiment);
 }
 
+TEST(ThreadPool, ExhaustiveSearchCheck)
+{
+  static bool found_solution = false;
+  ThreadPool<int> pool(4);
+  std::shared_ptr<ExperimentBuilder<int>> experiment =
+      std::make_shared<ExperimentBuilder<int>>(
+          []() { return std::make_tuple<int>(1); },
+          [](WorkQueue &work_queue, int &value) {
+            auto actions = std::make_unique<RunnableActionSet>(work_queue);
+            actions->add_action(
+                [](RunnableActionSet &set, int &value) -> Async {
+                  co_await set.bg();
+                  value += 1;
+                  co_await set.bg();
+                  value += 1;
+                  co_await set.bg();
+                  value += 1;
+                  co_await set.bg();
+                  value += 1;
+                },
+                value);
+            actions->add_action(
+                [](RunnableActionSet &set, int &value) -> Async {
+                  co_await set.bg();
+                  value *= 2;
+                },
+                value);
+            actions->add_action(
+                [](RunnableActionSet &set, int &value) -> Async {
+                  co_await set.bg();
+                  value *= 4;
+                },
+                value);
+            actions->add_action(
+                [](RunnableActionSet &set, int &value) -> Async {
+                  co_await set.bg();
+                  value *= 2;
+                  co_await set.bg();
+                  value *= 2;
+                },
+                value);
+            return actions;
+          },
+          [](ActionResult res, int &value) -> bool {
+            if (res != ActionResult::kOk) {
+              return false;
+            }
+
+            // Start with 1.  Then alternate multiplying by 2 and adding 1, with
+            // a *4 mixed in.
+            if (value == 0b111011) {
+              found_solution = true;
+            }
+            return true;
+          });
+
+  pool.run(experiment);
+
+  ASSERT_TRUE(found_solution);
+}
+
 } // namespace model
