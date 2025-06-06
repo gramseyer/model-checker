@@ -1,5 +1,7 @@
 # Model Checker
 
+[![C++ CI](https://github.com/gramseyer/model-checker/actions/workflows/cpp.yml/badge.svg)](https://github.com/gramseyer/model-checker/actions/workflows/cpp.yml)
+
 A C++23 library for systematic testing of concurrent and asynchronous code.
 This library exhaustively explores different execution interleavings of concurrent operations.
 

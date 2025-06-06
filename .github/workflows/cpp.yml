@@ -32,7 +32,11 @@ jobs:
       run: clang --version
     - name: install packages
       run: sudo apt-get install -y cmake
-    - name: build
-      run: ./scripts/build.sh -c clang
-    - name: test
-      run: cd build && ctest
+    - name: build gcc
+      run: ./scripts/build.sh -d build_gcc -c gcc
+    - name: test gcc
+      run: cd build_gcc && ctest
+    - name: build clang
+      run: ./scripts/build.sh -d build_llvm -c clang
+    - name: test clang
+      run: cd build_llvm && ctest
