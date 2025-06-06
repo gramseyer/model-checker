@@ -9,6 +9,11 @@
 
 namespace model {
 
+// One thread's work to do on one (sub)tree of the search space.
+// Part of the queue can be stolen by another thread.
+// advance_cursor() iterates through paths.
+// Alternate choices (increased depth on the search tree) are added to the queue
+// on demand (as get_choice() is called).
 class WorkQueue {
 public:
   WorkQueue() = default;
@@ -57,8 +62,14 @@ private:
   // held during these methods. get_choice can modify passed_choices_ _if and
   // only if_ we add a new choice, so get_choice only acquires the mutex in that
   // scenario.
+
   std::mutex mtx_;
+  // The work queue will be done once we finish exploring the search subtree
+  // that starts with this prefix.
   const std::vector<uint8_t> committed_choices_;
+  // passed_choices_.first is the choice currently being explored.
+  // passed_choices_.second is the remaining choices to explore, at that branch.
+  // These might get stolen by another thread.
   std::vector<std::pair<uint8_t, std::vector<uint8_t>>> passed_choices_;
   bool done_ = false;
 };

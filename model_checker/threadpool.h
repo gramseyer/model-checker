@@ -10,7 +10,6 @@
 #include <memory>
 #include <mutex>
 #include <optional>
-#include <stdexcept>
 #include <stop_token>
 #include <thread>
 #include <tuple>
@@ -94,7 +93,6 @@ private:
   std::function<std::unique_ptr<RunnableActionSet>(WorkQueue &, Args &...)>
       build_;
   std::function<bool(ActionResult, Args &...)> check_;
-
   std::function<std::tuple<Args...>()> args_;
 };
 
