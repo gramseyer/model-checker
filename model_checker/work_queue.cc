@@ -3,7 +3,7 @@
 #include <atomic>
 #include <cassert>
 #include <cstdint>
-#include <format>
+#include <string>
 #include <vector>
 
 namespace model {
@@ -176,21 +176,18 @@ WorkQueue::get_current_path() const
 std::string
 show_path(const std::vector<uint8_t> &path)
 {
-  if constexpr (requires { std::format("{}", path); }) {
-    return std::format("{}", path);
-  }
-  else {
-    std::string out = "{";
-    bool first = true;
-    for (auto c : path) {
-      if (!first) {
-        out += ", ";
-      }
-      out += std::to_string(c);
-      first = false;
+  // Support for format(vector) is missing on all but the latest compilers, apparently.
+  std::string out = "{";
+  bool first = true;
+  for (auto c : path) {
+    if (!first) {
+      out += ", ";
     }
-    return out;
+    out += std::to_string(c);
+    first = false;
   }
+  out += "}";
+  return out;
 }
 
 } // namespace model

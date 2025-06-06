@@ -6,6 +6,7 @@
 #include <memory>
 #include <mutex>
 #include <queue>
+#include <string>
 #include <vector>
 
 namespace model {
