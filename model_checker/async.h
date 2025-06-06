@@ -31,7 +31,7 @@ enum class ActionResult { OK = 0, TIMEOUT = 1 };
 
 class RunnableActionSet;
 
-template <typename T, typename... Args>
+template<typename T, typename... Args>
 concept is_captureless_lambda =
     requires(T f) { static_cast<Async (*)(RunnableActionSet &, Args...)>(f); };
 
@@ -39,7 +39,8 @@ class RunnableActionSet {
 public:
   RunnableActionSet(WorkQueue &work_queue,
                     size_t max_decisions = std::numeric_limits<size_t>::max())
-      : work_queue_(work_queue), max_decisions_(max_decisions) {}
+    : work_queue_(work_queue), max_decisions_(max_decisions)
+  {}
 
   // disable copy and move
   RunnableActionSet(const RunnableActionSet &) = delete;
@@ -47,17 +48,20 @@ public:
   RunnableActionSet(RunnableActionSet &&) = delete;
   RunnableActionSet &operator=(RunnableActionSet &&) = delete;
 
-  template <typename... Args>
-  void add_action(is_captureless_lambda<Args...> auto action, Args &&...args) {
+  template<typename... Args>
+  void add_action(is_captureless_lambda<Args...> auto action, Args &&...args)
+  {
     assert(decision_count_ == 0);
     action(*this, std::forward<Args>(args)...);
   }
 
-  [[nodiscard]] auto bg() {
+  [[nodiscard]] auto bg()
+  {
     struct AwaitBackground {
       RunnableActionSet &set;
       bool await_ready() const noexcept { return false; }
-      void await_suspend(std::coroutine_handle<> h) const noexcept {
+      void await_suspend(std::coroutine_handle<> h) const noexcept
+      {
         set.actions_.push_back(h);
         if (set.decision_count_ != 0) {
           set.run_next_decision();

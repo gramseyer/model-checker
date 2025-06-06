@@ -7,7 +7,9 @@
 
 namespace model {
 
-std::unique_ptr<WorkQueue> WorkQueue::steal_work() {
+std::unique_ptr<WorkQueue>
+WorkQueue::steal_work()
+{
   std::lock_guard lock(mtx_);
   if (done_) {
     return nullptr;
@@ -30,7 +32,9 @@ std::unique_ptr<WorkQueue> WorkQueue::steal_work() {
   return nullptr;
 }
 
-uint8_t WorkQueue::get_choice(uint8_t height, uint8_t n_opts) {
+uint8_t
+WorkQueue::get_choice(uint8_t height, uint8_t n_opts)
+{
   if (height < committed_choices_.size()) {
     return committed_choices_[height];
   }
@@ -52,7 +56,9 @@ uint8_t WorkQueue::get_choice(uint8_t height, uint8_t n_opts) {
   return 0;
 }
 
-void WorkQueue::advance_cursor() {
+void
+WorkQueue::advance_cursor()
+{
   std::lock_guard lock(mtx_);
 
   for (ssize_t i = passed_choices_.size() - 1; i >= 0; --i) {
@@ -73,11 +79,14 @@ void WorkQueue::advance_cursor() {
 }
 
 WorkQueueManager::WorkQueueManager(size_t n_work_queues)
-    : work_queues_(n_work_queues) {
+  : work_queues_(n_work_queues)
+{
   work_queues_[0].work_ = std::make_shared<WorkQueue>();
 }
 
-void WorkQueueManager::mark_as_stealable(QueueState &state) {
+void
+WorkQueueManager::mark_as_stealable(QueueState &state)
+{
 
   if (state.in_steal_queue_) {
     return;
@@ -89,7 +98,9 @@ void WorkQueueManager::mark_as_stealable(QueueState &state) {
   cv_.notify_all();
 }
 
-WorkQueue *WorkQueueManager::get_work_queue(size_t idx) {
+WorkQueue *
+WorkQueueManager::get_work_queue(size_t idx)
+{
   assert(idx < work_queues_.size());
 
   if (work_queues_[idx].work_ != nullptr && !work_queues_[idx].work_->done()) {

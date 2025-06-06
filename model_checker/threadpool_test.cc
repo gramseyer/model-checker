@@ -10,7 +10,8 @@ namespace model {
 
 // Deliberately keeping test small to test edge cases of
 // not enough work to steal and simple shutdown.
-TEST(ThreadPool, Basic) {
+TEST(ThreadPool, Basic)
+{
   ThreadPool<int, int> pool(4);
   std::shared_ptr<ExperimentBuilder<int, int>> experiment =
       std::make_shared<ExperimentBuilder<int, int>>(
@@ -40,7 +41,8 @@ TEST(ThreadPool, Basic) {
   pool.run(experiment);
 }
 
-TEST(ThreadPool, Stealing) {
+TEST(ThreadPool, Stealing)
+{
   ThreadPool<int, int> pool(4);
   std::shared_ptr<ExperimentBuilder<int, int>> experiment =
       std::make_shared<ExperimentBuilder<int, int>>(
@@ -103,7 +105,8 @@ TEST(ThreadPool, Stealing) {
   pool.run(experiment);
 }
 
-TEST(ThreadPool, NoWaitPointsEdgeCase) {
+TEST(ThreadPool, NoWaitPointsEdgeCase)
+{
   ThreadPool<int, int> pool(4);
   std::shared_ptr<ExperimentBuilder<int, int>> experiment =
       std::make_shared<ExperimentBuilder<int, int>>(
@@ -132,7 +135,8 @@ TEST(ThreadPool, NoWaitPointsEdgeCase) {
   pool.run(experiment);
 }
 
-TEST(ThreadPool, NoActionsEdgeCase) {
+TEST(ThreadPool, NoActionsEdgeCase)
+{
   ThreadPool<int, int> pool(4);
   std::shared_ptr<ExperimentBuilder<int, int>> experiment =
       std::make_shared<ExperimentBuilder<int, int>>(

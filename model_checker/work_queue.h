@@ -13,7 +13,8 @@ class WorkQueue {
 public:
   WorkQueue() = default;
   WorkQueue(std::vector<uint8_t> committed_choices)
-      : mtx_(), committed_choices_(std::move(committed_choices)) {}
+    : mtx_(), committed_choices_(std::move(committed_choices))
+  {}
 
   // disable copy and move
   WorkQueue(const WorkQueue &) = delete;
@@ -32,7 +33,8 @@ public:
   void advance_cursor();
   bool done() const { return done_; }
 
-  size_t decision_count() const {
+  size_t decision_count() const
+  {
     return committed_choices_.size() + passed_choices_.size();
   }
 
@@ -56,7 +58,8 @@ public:
   // Steals work if current work queue is done
   // returns nullptr if overall work is done
   WorkQueue *get_work_queue(size_t idx);
-  void mark_self_as_stealable(size_t idx) {
+  void mark_self_as_stealable(size_t idx)
+  {
     mark_as_stealable(work_queues_[idx]);
   }
 

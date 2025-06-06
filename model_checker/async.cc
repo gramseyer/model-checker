@@ -2,7 +2,9 @@
 
 namespace model {
 
-void RunnableActionSet::run_next_decision() {
+void
+RunnableActionSet::run_next_decision()
+{
   if (actions_.empty() || decision_count_ >= max_decisions_) {
     return;
   }
@@ -18,7 +20,9 @@ void RunnableActionSet::run_next_decision() {
   action.resume();
 }
 
-ActionResult RunnableActionSet::run() {
+ActionResult
+RunnableActionSet::run()
+{
   assert(decision_count_ == 0);
   while (!actions_.empty() && decision_count_ < max_decisions_) {
     run_next_decision();

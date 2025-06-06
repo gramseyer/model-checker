@@ -4,7 +4,8 @@
 
 namespace model {
 
-TEST(Async, RunnableActionSetBasic) {
+TEST(Async, RunnableActionSetBasic)
+{
   WorkQueue work_queue;
 
   RunnableActionSet set(work_queue);
@@ -25,7 +26,8 @@ TEST(Async, RunnableActionSetBasic) {
   EXPECT_TRUE(work_queue.done());
 }
 
-TEST(Async, RunnableActionSetMultipleActions) {
+TEST(Async, RunnableActionSetMultipleActions)
+{
   WorkQueue work_queue;
 
   RunnableActionSet set(work_queue);
@@ -53,7 +55,8 @@ TEST(Async, RunnableActionSetMultipleActions) {
   EXPECT_FALSE(work_queue.done());
 }
 
-TEST(Async, RunnableActionSetFullTree) {
+TEST(Async, RunnableActionSetFullTree)
+{
   WorkQueue work_queue;
   size_t loop_iters = 0;
   while (!work_queue.done()) {
@@ -90,7 +93,8 @@ TEST(Async, RunnableActionSetFullTree) {
   EXPECT_EQ(loop_iters, 6);
 }
 
-TEST(Async, RunnableActionSetAdditionIsCommutative) {
+TEST(Async, RunnableActionSetAdditionIsCommutative)
+{
   WorkQueue work_queue;
 
   size_t loop_iters = 0;
@@ -130,7 +134,8 @@ TEST(Async, RunnableActionSetAdditionIsCommutative) {
   EXPECT_EQ(loop_iters, 6);
 }
 
-TEST(Async, BlockProposalMimic) {
+TEST(Async, BlockProposalMimic)
+{
   WorkQueue work_queue;
 
   while (!work_queue.done()) {
@@ -159,8 +164,8 @@ TEST(Async, BlockProposalMimic) {
     auto r = set.run();
     if (r == ActionResult::TIMEOUT) {
       ASSERT_TRUE(value == 10 || value == 15 || value == 27);
-
-    } else {
+    }
+    else {
       ASSERT_EQ(r, ActionResult::OK);
       ASSERT_EQ(value, 10 + 5 + 12 - 20);
     }

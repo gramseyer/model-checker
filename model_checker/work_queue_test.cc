@@ -4,7 +4,8 @@
 
 namespace model {
 
-TEST(WorkQueue, Choices) {
+TEST(WorkQueue, Choices)
+{
   WorkQueue work_queue;
 
   EXPECT_EQ(work_queue.get_choice(0, 2), 0);
@@ -32,7 +33,8 @@ TEST(WorkQueue, Choices) {
   EXPECT_TRUE(work_queue.done());
 }
 
-TEST(WorkQueue, StealWork) {
+TEST(WorkQueue, StealWork)
+{
   WorkQueue work_queue;
   EXPECT_FALSE(work_queue.steal_work());
 

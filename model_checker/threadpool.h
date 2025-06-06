@@ -24,16 +24,18 @@ namespace model {
 
 // Experiment and ExperimentBuilder are my attempt at making it hard to mis-use
 // this library with accidental captures in the lambdas.
-template <typename... Args> class Experiment {
+template<typename... Args> class Experiment {
 public:
   Experiment(
       std::tuple<Args...> args,
       std::function<std::unique_ptr<RunnableActionSet>(WorkQueue &, Args &...)>
           build,
       std::function<bool(ActionResult, Args &...)> check)
-      : args_(args), build_(build), check_(check) {}
+    : args_(args), build_(build), check_(check)
+  {}
 
-  std::unique_ptr<RunnableActionSet> build(WorkQueue &work_queue) {
+  std::unique_ptr<RunnableActionSet> build(WorkQueue &work_queue)
+  {
     assert(state_ == ExperimentState::kInitialized);
     state_ = ExperimentState::kRunning;
     return [&]<size_t... I>(std::index_sequence<I...>) {
@@ -41,7 +43,8 @@ public:
     }(std::make_index_sequence<sizeof...(Args)>());
   }
 
-  bool check(ActionResult res) {
+  bool check(ActionResult res)
+  {
     assert(state_ == ExperimentState::kRunning);
     state_ = ExperimentState::kChecked;
     return [&]<size_t... I>(std::index_sequence<I...>) {
@@ -69,15 +72,17 @@ private:
   Experiment &operator=(Experiment &&) = delete;
 };
 
-template <typename... Args> class ExperimentBuilder {
+template<typename... Args> class ExperimentBuilder {
 public:
   ExperimentBuilder(std::tuple<Args...> args,
                     std::unique_ptr<RunnableActionSet> (*build)(WorkQueue &,
                                                                 Args &...),
                     bool (*check)(ActionResult, Args &...))
-      : args_(args), build_(build), check_(check) {}
+    : args_(args), build_(build), check_(check)
+  {}
 
-  Experiment<Args...> build() {
+  Experiment<Args...> build()
+  {
     return Experiment<Args...>(args_, build_, check_);
   }
 
@@ -89,9 +94,10 @@ private:
   const std::tuple<Args...> args_;
 };
 
-template <typename... Args> class ThreadPool {
+template<typename... Args> class ThreadPool {
 public:
-  ThreadPool(int n = std::thread::hardware_concurrency()) {
+  ThreadPool(int n = std::thread::hardware_concurrency())
+  {
     workers_.reserve(n);
     for (int i = 0; i < n; ++i) {
       workers_.emplace_back(
@@ -105,7 +111,8 @@ public:
   ThreadPool(const ThreadPool &p) = delete;
   ThreadPool &operator=(const ThreadPool &p) = delete;
 
-  void run(std::shared_ptr<ExperimentBuilder<Args...>> experiment) {
+  void run(std::shared_ptr<ExperimentBuilder<Args...>> experiment)
+  {
     barrier_.emplace(workers_.size());
     finish_ = false;
     {
@@ -123,7 +130,8 @@ public:
     finish_.notify_all();
   }
 
-  ~ThreadPool() {
+  ~ThreadPool()
+  {
     assert(work_queue_manager_ == nullptr);
     assert(experiment_ == nullptr);
   }
@@ -141,7 +149,8 @@ private:
   std::vector<std::jthread> workers_;
 
   // worker_loop is the main loop run by each worker thread.
-  void worker_loop(const std::stop_token &stoken, size_t worker_id) {
+  void worker_loop(const std::stop_token &stoken, size_t worker_id)
+  {
     while (true) {
       WorkQueueManager *work_queue_manager = nullptr;
       using experiment_type = decltype(experiment_)::element_type;
