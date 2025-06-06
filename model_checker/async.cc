@@ -28,10 +28,10 @@ RunnableActionSet::run()
     run_next_decision();
   }
   if (actions_.empty()) {
-    return ActionResult::OK;
+    return ActionResult::kOk;
   }
   assert(decision_count_ == max_decisions_);
-  return ActionResult::TIMEOUT;
+  return ActionResult::kTimeout;
 }
 
 } // namespace model

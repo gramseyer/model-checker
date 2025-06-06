@@ -10,14 +10,16 @@
 namespace model {
 
 struct Async {
+  // NOLINTBEGIN(readability-convert-member-functions-to-static)
+  // NOLINTNEXTLINE(readability-identifier-naming)
   struct promise_type {
-    Async get_return_object() const noexcept { return {}; }
+    Async get_return_object() noexcept { return {}; }
     std::suspend_never initial_suspend() const noexcept { return {}; }
     void return_void() const noexcept {}
     void unhandled_exception() const noexcept { std::terminate(); }
     std::suspend_never final_suspend() const noexcept { return {}; }
   };
-
+  // NOLINTEND(readability-convert-member-functions-to-static)
   Async(Async &&) noexcept = delete;
 
 private:
@@ -27,7 +29,7 @@ private:
   Async() noexcept = default;
 };
 
-enum class ActionResult { OK = 0, TIMEOUT = 1 };
+enum class ActionResult { kOk = 0, kTimeout = 1 };
 
 class RunnableActionSet;
 
@@ -39,7 +41,7 @@ class RunnableActionSet {
 public:
   RunnableActionSet(WorkQueue &work_queue,
                     size_t max_decisions = std::numeric_limits<size_t>::max())
-    : work_queue_(work_queue), max_decisions_(max_decisions)
+    : max_decisions_(max_decisions), work_queue_(work_queue)
   {}
 
   // disable copy and move
@@ -59,7 +61,8 @@ public:
   {
     struct AwaitBackground {
       RunnableActionSet &set;
-      bool await_ready() const noexcept { return false; }
+      // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
+      bool await_ready() noexcept { return false; }
       void await_suspend(std::coroutine_handle<> h) const noexcept
       {
         set.actions_.push_back(h);

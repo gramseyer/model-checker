@@ -31,7 +31,7 @@ TEST(ThreadPool, Basic)
             return actions;
           },
           [](ActionResult res, int &a, int &b) -> bool {
-            if (res != ActionResult::OK) {
+            if (res != ActionResult::kOk) {
               return false;
             }
 
@@ -95,7 +95,7 @@ TEST(ThreadPool, Stealing)
             return actions;
           },
           [](ActionResult res, int &a, int &b) -> bool {
-            if (res != ActionResult::OK) {
+            if (res != ActionResult::kOk) {
               return false;
             }
 
@@ -125,7 +125,7 @@ TEST(ThreadPool, NoWaitPointsEdgeCase)
             return actions;
           },
           [](ActionResult res, int &a, int &b) -> bool {
-            if (res != ActionResult::OK) {
+            if (res != ActionResult::kOk) {
               return false;
             }
 
@@ -145,7 +145,7 @@ TEST(ThreadPool, NoActionsEdgeCase)
             return std::make_unique<RunnableActionSet>(work_queue);
           },
           [](ActionResult res, int &a, int &b) -> bool {
-            if (res != ActionResult::OK) {
+            if (res != ActionResult::kOk) {
               return false;
             }
 

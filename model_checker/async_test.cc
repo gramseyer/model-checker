@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "model_checker/async.h"
+#include "model_checker/work_queue.h"
 
 namespace model {
 
@@ -76,7 +77,7 @@ TEST(Async, RunnableActionSetFullTree)
       // 2-2
     });
 
-    ASSERT_EQ(set.run(), ActionResult::OK);
+    ASSERT_EQ(set.run(), ActionResult::kOk);
 
     loop_iters++;
     work_queue.advance_cursor();
@@ -124,7 +125,7 @@ TEST(Async, RunnableActionSetAdditionIsCommutative)
         },
         value);
 
-    ASSERT_EQ(set.run(), ActionResult::OK);
+    ASSERT_EQ(set.run(), ActionResult::kOk);
 
     loop_iters++;
     work_queue.advance_cursor();
@@ -162,11 +163,11 @@ TEST(Async, BlockProposalMimic)
         value);
 
     auto r = set.run();
-    if (r == ActionResult::TIMEOUT) {
+    if (r == ActionResult::kTimeout) {
       ASSERT_TRUE(value == 10 || value == 15 || value == 27);
     }
     else {
-      ASSERT_EQ(r, ActionResult::OK);
+      ASSERT_EQ(r, ActionResult::kOk);
       ASSERT_EQ(value, 10 + 5 + 12 - 20);
     }
 

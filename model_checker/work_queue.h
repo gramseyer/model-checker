@@ -13,7 +13,7 @@ class WorkQueue {
 public:
   WorkQueue() = default;
   WorkQueue(std::vector<uint8_t> committed_choices)
-    : mtx_(), committed_choices_(std::move(committed_choices))
+    : committed_choices_(std::move(committed_choices))
   {}
 
   // disable copy and move
