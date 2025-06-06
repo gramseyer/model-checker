@@ -4,6 +4,7 @@
 #include <cassert>
 #include <condition_variable>
 #include <cstddef>
+#include <format>
 #include <functional>
 #include <future>
 #include <latch>
