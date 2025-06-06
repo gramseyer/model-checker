@@ -5,15 +5,21 @@
 
 #pragma once
 
+#include <atomic>
 #include <cassert>
 #include <condition_variable>
+#include <cstddef>
 #include <functional>
 #include <future>
 #include <latch>
 #include <memory>
 #include <mutex>
+#include <optional>
+#include <stdexcept>
 #include <stop_token>
 #include <thread>
+#include <tuple>
+#include <utility>
 #include <vector>
 #include <version>
 
@@ -52,6 +58,12 @@ public:
     }(std::make_index_sequence<sizeof...(Args)>());
   }
 
+  // disable copy and move
+  Experiment(const Experiment &) = delete;
+  Experiment &operator=(const Experiment &) = delete;
+  Experiment(Experiment &&) = delete;
+  Experiment &operator=(Experiment &&) = delete;
+
 private:
   enum class ExperimentState {
     kInitialized = 0,
@@ -64,12 +76,6 @@ private:
       build_;
   std::function<bool(ActionResult, Args &...)> check_;
   ExperimentState state_ = ExperimentState::kInitialized;
-
-  // disable copy and move
-  Experiment(const Experiment &) = delete;
-  Experiment &operator=(const Experiment &) = delete;
-  Experiment(Experiment &&) = delete;
-  Experiment &operator=(Experiment &&) = delete;
 };
 
 template<typename... Args> class ExperimentBuilder {
