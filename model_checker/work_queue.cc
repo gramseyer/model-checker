@@ -176,7 +176,8 @@ WorkQueue::get_current_path() const
 std::string
 show_path(const std::vector<uint8_t> &path)
 {
-  // Support for format(vector) is missing on all but the latest compilers, apparently.
+  // Support for format(vector) is missing on all but the latest compilers,
+  // apparently.
   std::string out = "{";
   bool first = true;
   for (auto c : path) {
