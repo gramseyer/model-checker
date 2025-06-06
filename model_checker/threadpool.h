@@ -17,6 +17,10 @@
 #include <vector>
 #include <version>
 
+#if __has_include(<gtest/gtest.h>)
+#include <gtest/gtest.h>
+#endif
+
 #include "model_checker/async.h"
 #include "model_checker/work_queue.h"
 
@@ -143,6 +147,20 @@ public:
     bad_path_ = std::nullopt;
     return out;
   }
+
+#if __has_include(<gtest/gtest.h>)
+  ::testing::AssertionResult
+  run_test(std::shared_ptr<ExperimentBuilder<Args...>> experiment,
+           std::vector<uint8_t> initial_path = {})
+  {
+    auto res = run(experiment, initial_path);
+    if (res.has_value()) {
+      return ::testing::AssertionFailure()
+             << "Found bad path: " << std::format("{}", res.value());
+    }
+    return ::testing::AssertionSuccess();
+  }
+#endif
 
   ~ThreadPool()
   {

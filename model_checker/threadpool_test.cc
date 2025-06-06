@@ -39,7 +39,7 @@ TEST(ThreadPool, Basic)
             return a == 4 && b == 8;
           });
 
-  EXPECT_FALSE(pool.run(experiment).has_value());
+  EXPECT_TRUE(pool.run_test(experiment));
 }
 
 TEST(ThreadPool, Stealing)
@@ -103,7 +103,7 @@ TEST(ThreadPool, Stealing)
             return a == 33 && b == 18;
           });
 
-  EXPECT_FALSE(pool.run(experiment).has_value());
+  EXPECT_TRUE(pool.run_test(experiment));
 }
 
 TEST(ThreadPool, NoWaitPointsEdgeCase)
@@ -133,7 +133,7 @@ TEST(ThreadPool, NoWaitPointsEdgeCase)
             return a == 2 && b == 1;
           });
 
-  EXPECT_FALSE(pool.run(experiment).has_value());
+  EXPECT_TRUE(pool.run_test(experiment));
 }
 
 TEST(ThreadPool, NoActionsEdgeCase)
@@ -153,7 +153,7 @@ TEST(ThreadPool, NoActionsEdgeCase)
             return a == 1 && b == 2;
           });
 
-  EXPECT_FALSE(pool.run(experiment).has_value());
+  EXPECT_TRUE(pool.run_test(experiment));
 }
 
 TEST(ThreadPool, ExhaustiveSearchCheck)
@@ -212,8 +212,7 @@ TEST(ThreadPool, ExhaustiveSearchCheck)
             return true;
           });
 
-  auto bad_path = pool.run(experiment);
-  EXPECT_FALSE(bad_path.has_value());
+  EXPECT_TRUE(pool.run_test(experiment));
 
   ASSERT_TRUE(found_solution);
 }
@@ -259,7 +258,8 @@ TEST(ThreadPool, FindBadPath)
           });
 
   auto bad_path = pool.run(experiment);
-  EXPECT_TRUE(bad_path.has_value());
+  ASSERT_TRUE(bad_path.has_value());
+  // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
   EXPECT_EQ(bad_path.value(), std::vector<uint8_t>({1, 0, 0}));
 }
 
