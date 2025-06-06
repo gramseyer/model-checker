@@ -28,7 +28,7 @@ namespace model {
 template<typename... Args> class Experiment {
 public:
   Experiment(
-      std::function<std::tuple<Args...>()>& args_builder,
+      std::function<std::tuple<Args...>()> &args_builder,
       std::function<std::unique_ptr<RunnableActionSet>(WorkQueue &, Args &...)>
           build,
       std::function<bool(ActionResult, Args &...)> check)

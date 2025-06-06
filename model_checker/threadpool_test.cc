@@ -142,7 +142,7 @@ TEST(ThreadPool, NoActionsEdgeCase)
   std::shared_ptr<ExperimentBuilder<int, int>> experiment =
       std::make_shared<ExperimentBuilder<int, int>>(
           []() { return std::make_tuple(1, 2); },
-          [](WorkQueue &work_queue, int &/*unused*/, int &/*unused*/) {
+          [](WorkQueue &work_queue, int & /*unused*/, int & /*unused*/) {
             return std::make_unique<RunnableActionSet>(work_queue);
           },
           [](ActionResult res, int &a, int &b) -> bool {
