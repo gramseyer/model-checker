@@ -96,9 +96,20 @@ WorkQueueManager::mark_as_stealable(QueueState &state)
   }
 
   std::lock_guard lock(mtx_);
+  if (shortcircuit_done_) {
+    return;
+  }
   state.in_steal_queue_ = true;
   stealable_set_.push(&state);
   cv_.notify_all();
+}
+
+void
+WorkQueueManager::shortcircuit_done()
+{
+  std::lock_guard lock(mtx_);
+  stealable_set_ = {};
+  shortcircuit_done_ = true;
 }
 
 WorkQueue *
@@ -130,7 +141,7 @@ WorkQueueManager::get_work_queue(size_t idx)
       cv_.notify_all();
       return nullptr;
     }
-    auto steal_from = stealable_set_.front();
+    auto *steal_from = stealable_set_.front();
     assert(steal_from);
     assert(steal_from->work_);
 

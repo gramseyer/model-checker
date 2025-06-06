@@ -78,6 +78,8 @@ public:
 
   bool done() const;
 
+  void shortcircuit_done();
+
 private:
   struct QueueState {
     QueueState() = default;
@@ -93,6 +95,7 @@ private:
   std::condition_variable cv_;
   int32_t pending_steals_ = 0;
   std::queue<QueueState *> stealable_set_;
+  bool shortcircuit_done_ = false;
 };
 
 } // namespace model

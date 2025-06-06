@@ -117,8 +117,11 @@ public:
 
   // Supply the initial_path with some vector of choices if you wish to check
   // only a subset of the search space.
-  void run(std::shared_ptr<ExperimentBuilder<Args...>> experiment,
-           std::vector<uint8_t> initial_path = {})
+  // returns a bad path, if one is found.
+  [[nodiscard]]
+  std::optional<std::vector<uint8_t>>
+  run(std::shared_ptr<ExperimentBuilder<Args...>> experiment,
+      std::vector<uint8_t> initial_path = {})
   {
     barrier_.emplace(workers_.size());
     finish_ = false;
@@ -137,6 +140,10 @@ public:
     experiment_ = nullptr;
     finish_ = true;
     finish_.notify_all();
+
+    auto out = std::move(bad_path_);
+    bad_path_ = std::nullopt;
+    return out;
   }
 
   ~ThreadPool()
@@ -156,6 +163,8 @@ private:
   std::atomic<bool> finish_ = false;
 
   std::vector<std::jthread> workers_;
+
+  std::optional<std::vector<uint8_t>> bad_path_;
 
   // worker_loop is the main loop run by each worker thread.
   void worker_loop(const std::stop_token &stoken, size_t worker_id)
@@ -196,7 +205,11 @@ private:
 
         // TODO(geoff): maybe instead return a bool to top level result
         if (!check_res) {
-          throw std::runtime_error("validation failed");
+          std::lock_guard lock(mtx_);
+          if (!bad_path_) {
+            bad_path_ = work_queue->get_current_path();
+          }
+          work_queue_manager->shortcircuit_done();
         }
 
         work_queue->advance_cursor();
