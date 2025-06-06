@@ -5,6 +5,7 @@
 
 #include "model_checker/async.h"
 #include "model_checker/threadpool.h"
+#include "model_checker/work_queue.h"
 
 namespace model {
 
@@ -15,7 +16,7 @@ TEST(ThreadPool, Basic)
   ThreadPool<int, int> pool(4);
   std::shared_ptr<ExperimentBuilder<int, int>> experiment =
       std::make_shared<ExperimentBuilder<int, int>>(
-          std::make_tuple(1, 2),
+          []() { return std::make_tuple(1, 2); },
           [](WorkQueue &work_queue, int &a, int &b) {
             auto actions = std::make_unique<RunnableActionSet>(work_queue);
 
@@ -46,7 +47,7 @@ TEST(ThreadPool, Stealing)
   ThreadPool<int, int> pool(4);
   std::shared_ptr<ExperimentBuilder<int, int>> experiment =
       std::make_shared<ExperimentBuilder<int, int>>(
-          std::make_tuple(0, 0),
+          []() { return std::make_tuple(0, 0); },
           [](WorkQueue &work_queue, int &a, int &b) {
             auto actions = std::make_unique<RunnableActionSet>(work_queue);
 
@@ -110,7 +111,7 @@ TEST(ThreadPool, NoWaitPointsEdgeCase)
   ThreadPool<int, int> pool(4);
   std::shared_ptr<ExperimentBuilder<int, int>> experiment =
       std::make_shared<ExperimentBuilder<int, int>>(
-          std::make_tuple(1, 2),
+          []() { return std::make_tuple(1, 2); },
           [](WorkQueue &work_queue, int &a, int &b) {
             auto actions = std::make_unique<RunnableActionSet>(work_queue);
 
@@ -140,8 +141,8 @@ TEST(ThreadPool, NoActionsEdgeCase)
   ThreadPool<int, int> pool(4);
   std::shared_ptr<ExperimentBuilder<int, int>> experiment =
       std::make_shared<ExperimentBuilder<int, int>>(
-          std::make_tuple(1, 2),
-          [](WorkQueue &work_queue, int &a, int &b) {
+          []() { return std::make_tuple(1, 2); },
+          [](WorkQueue &work_queue, int &/*unused*/, int &/*unused*/) {
             return std::make_unique<RunnableActionSet>(work_queue);
           },
           [](ActionResult res, int &a, int &b) -> bool {

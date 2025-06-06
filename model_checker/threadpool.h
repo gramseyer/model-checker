@@ -1,8 +1,3 @@
-// worker_pool.h - a thread pool abstraction
-//
-// submit() is not optimized/intended for very short jobs, but you can use
-// for_each_parallel() with a large enough width instead.
-
 #pragma once
 
 #include <atomic>
@@ -33,11 +28,11 @@ namespace model {
 template<typename... Args> class Experiment {
 public:
   Experiment(
-      std::tuple<Args...> args,
+      std::function<std::tuple<Args...>()>& args_builder,
       std::function<std::unique_ptr<RunnableActionSet>(WorkQueue &, Args &...)>
           build,
       std::function<bool(ActionResult, Args &...)> check)
-    : args_(args), build_(build), check_(check)
+    : args_(args_builder()), build_(build), check_(check)
   {}
 
   std::unique_ptr<RunnableActionSet> build(WorkQueue &work_queue)
@@ -78,13 +73,16 @@ private:
   ExperimentState state_ = ExperimentState::kInitialized;
 };
 
+// The args() function creates a new instance of experiment state.
+// This function is the only one that's allowed to have stateful captures
+// if it is e.g. passed in as a lambda.
 template<typename... Args> class ExperimentBuilder {
 public:
-  ExperimentBuilder(std::tuple<Args...> args,
+  ExperimentBuilder(std::function<std::tuple<Args...>()> args,
                     std::unique_ptr<RunnableActionSet> (*build)(WorkQueue &,
                                                                 Args &...),
                     bool (*check)(ActionResult, Args &...))
-    : args_(args), build_(build), check_(check)
+    : build_(build), check_(check), args_(args)
   {}
 
   Experiment<Args...> build()
@@ -97,7 +95,7 @@ private:
       build_;
   std::function<bool(ActionResult, Args &...)> check_;
 
-  const std::tuple<Args...> args_;
+  std::function<std::tuple<Args...>()> args_;
 };
 
 template<typename... Args> class ThreadPool {
