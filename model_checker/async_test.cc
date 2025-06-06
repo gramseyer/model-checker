@@ -1,5 +1,8 @@
 #include <gtest/gtest.h>
 
+#include <cstddef>
+#include <cstdint>
+
 #include "model_checker/async.h"
 #include "model_checker/work_queue.h"
 

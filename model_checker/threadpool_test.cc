@@ -1,7 +1,9 @@
 #include <gtest/gtest.h>
 
+#include <cstdint>
 #include <memory>
 #include <tuple>
+#include <vector>
 
 #include "model_checker/async.h"
 #include "model_checker/threadpool.h"

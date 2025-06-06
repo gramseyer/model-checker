@@ -1,5 +1,10 @@
 #include "model_checker/async.h"
 
+#include <cassert>
+#include <coroutine>
+#include <cstddef>
+#include <cstdint>
+
 namespace model {
 
 void

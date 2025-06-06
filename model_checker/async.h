@@ -2,7 +2,10 @@
 
 #include <cassert>
 #include <coroutine>
+#include <cstddef>
+#include <cstdint>
 #include <exception>
+#include <limits>
 #include <vector>
 
 #include "model_checker/work_queue.h"

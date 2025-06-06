@@ -2,11 +2,18 @@
 
 #include <atomic>
 #include <cassert>
+#include <cstddef>
 #include <cstdint>
+#include <memory>
+#include <mutex>
 #include <string>
+#include <type_traits>
+#include <utility>
 #include <vector>
 
 namespace model {
+
+using ssize_t = std::make_signed_t<size_t>;
 
 std::unique_ptr<WorkQueue>
 WorkQueue::steal_work()

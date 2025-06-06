@@ -2,11 +2,13 @@
 
 #include <atomic>
 #include <condition_variable>
+#include <cstddef>
 #include <cstdint>
 #include <memory>
 #include <mutex>
 #include <queue>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace model {
