@@ -78,14 +78,16 @@ private:
 };
 
 // The args() function creates a new instance of experiment state.
-// This function is the only one that's allowed to have stateful captures
-// if it is e.g. passed in as a lambda.
+// check() runs at the end of the experiment, determining whether the trace is
+// valid. args() and check() are allowed to capture state, but build() is not.
+// It's too easy to then use that captured state in an action, which can then
+// cause an error.
 template<typename... Args> class ExperimentBuilder {
 public:
   ExperimentBuilder(std::function<std::tuple<Args...>()> args,
                     std::unique_ptr<RunnableActionSet> (*build)(WorkQueue &,
                                                                 Args &...),
-                    bool (*check)(ActionResult, Args &...))
+                    std::function<bool(ActionResult, Args &...)> check)
     : build_(build), check_(check), args_(args)
   {}
 
