@@ -157,6 +157,7 @@ WorkQueueManager::get_work_queue(size_t idx)
       // not in steal queue because it's new work
       work_queues_[idx].work_ = std::move(ptr);
       work_queues_[idx].in_steal_queue_ = false;
+      assert(pending_steals_ > 0);
       pending_steals_--;
       return work_queues_[idx].work_.get();
     }

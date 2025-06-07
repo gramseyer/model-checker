@@ -99,7 +99,7 @@ private:
 
   std::mutex mtx_;
   std::condition_variable cv_;
-  int32_t pending_steals_ = 0;
+  uint32_t pending_steals_ = 0;
   std::queue<QueueState *> stealable_set_;
   bool shortcircuit_done_ = false;
 };
