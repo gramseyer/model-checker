@@ -53,6 +53,8 @@ public:
   RunnableActionSet(RunnableActionSet &&) = delete;
   RunnableActionSet &operator=(RunnableActionSet &&) = delete;
 
+  ~RunnableActionSet();
+
   template<typename... Args>
   void add_action(is_captureless_lambda<Args...> auto action, Args &&...args)
   {

@@ -7,6 +7,13 @@
 
 namespace model {
 
+RunnableActionSet::~RunnableActionSet()
+{
+  for (auto &action : actions_) {
+    action.destroy();
+  }
+}
+
 void
 RunnableActionSet::run_next_decision()
 {
