@@ -43,6 +43,7 @@ WorkQueue::steal_work()
 uint8_t
 WorkQueue::get_choice(uint8_t height, uint8_t n_opts)
 {
+  assert(n_opts >= 1);
   if (height < committed_choices_.size()) {
     assert(committed_choices_[height] < n_opts);
     return committed_choices_[height];
