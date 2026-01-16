@@ -21,30 +21,61 @@ WorkQueue work_queue;
 while (!work_queue.done()) {
     RunnableActionSet set(work_queue);
     int shared_value = 0;
-    
+
     // Action 1: increment
     set.add_action([](RunnableActionSet &set, int &value) -> Async {
-        co_await set.bg();
+        co_await set.bg();  // Switch point - other actions may run
         value += 10;
-        co_await set.bg();
+        co_await set.bg();  // Another switch point
         value += 5;
     }, shared_value);
-    
-    // Action 2: decrement  
+
+    // Action 2: decrement
     set.add_action([](RunnableActionSet &set, int &value) -> Async {
         co_await set.bg();
         value -= 3;
         co_await set.bg();
         value -= 2;
     }, shared_value);
-    
+
     auto result = set.run();
     // Check invariants
-    assert(shared_value == 10); // Should always be true
-    
+    // This always equals 10 regardless of interleaving: (+10 +5 -3 -2 = 10)
+    assert(shared_value == 10);
+
     work_queue.advance_cursor(); // Move to next interleaving
 }
 ```
+
+### Making Decisions with `choice()`
+
+The `choice()` method allows you to make non-deterministic choices without pausing the coroutine. This is useful for testing different execution paths based on runtime decisions.
+
+```cpp
+set.add_action([](RunnableActionSet &set, int &value) -> Async {
+    // choice() returns a value from 0 to (option_count - 1)
+    uint8_t decision = set.choice(3);  // Returns 0, 1, or 2
+
+    if (decision == 0) {
+        value += 10;
+    } else if (decision == 1) {
+        value += 20;
+    } else {
+        value += 30;
+    }
+
+    co_await set.bg();  // Switch point
+}, shared_value);
+```
+
+The model checker will explore all possible values returned by `choice()`, just like it explores all possible interleavings at `co_await set.bg()` points.
+
+### Action Results
+
+The `run()` method returns an `ActionResult` enum with the following values:
+
+- `ActionResult::kOk` - All actions completed successfully
+- `ActionResult::kTimeout` - The decision tree depth limit was reached (see Decision Limits below)
 
 ## Building
 
@@ -90,17 +121,29 @@ if (result == ActionResult::kTimeout) {
 ThreadPool<int> pool(4); // 4 worker threads
 
 auto experiment = std::make_shared<ExperimentBuilder<int>>(
-    std::make_tuple(42),
-    [](WorkQueue &wq, int &value) -> std::unique_ptr<RunnableActionSet> {
-        // Build your action set
+    []() { return std::make_tuple(0); },  // Initial state builder
+    [](WorkQueue &wq, int &value) {  // Action set builder
+        auto actions = std::make_unique<RunnableActionSet>(wq);
+
+        actions->add_action([](RunnableActionSet &set, int &val) -> Async {
+            co_await set.bg();
+            val += 10;
+        }, value);
+
+        actions->add_action([](RunnableActionSet &set, int &val) -> Async {
+            co_await set.bg();
+            val -= 5;
+        }, value);
+
+        return actions;
     },
-    [](ActionResult result, int &value) -> bool {
-        // Check invariants
-        return value >= 0;
+    [](ActionResult result, int &value) -> bool {  // Invariant checker
+        // This check runs after each interleaving
+        return value == 5;  // Should always be true (0 + 10 - 5 = 5)
     }
 );
 
-pool.run(experiment);
+pool.run(experiment);  // Returns std::nullopt if all checks pass
 ```
 
 WARNING:
