@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include <atomic>
 #include <cstdint>
 #include <memory>
 #include <tuple>
@@ -160,7 +161,7 @@ TEST(ThreadPool, NoActionsEdgeCase)
 
 TEST(ThreadPool, ExhaustiveSearchCheck)
 {
-  static bool found_solution = false;
+  static std::atomic<bool> found_solution = false;
   ThreadPool<int> pool(4);
   std::shared_ptr<ExperimentBuilder<int>> experiment =
       std::make_shared<ExperimentBuilder<int>>(
