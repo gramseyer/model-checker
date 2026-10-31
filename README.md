@@ -162,4 +162,6 @@ The ExperimentBuilder takes as input an initial state, a lambda that sets up act
 
 ## License
 
-This project is licensed under the terms specified in the LICENSE file.
+Copyright 2025 Geoffrey Ramseyer.
+
+Licensed under the [Apache License, Version 2.0](LICENSE).
